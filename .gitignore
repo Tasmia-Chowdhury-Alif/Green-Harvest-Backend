@@ -1,0 +1,51 @@
+# ==============================
+# Python / Django
+# ==============================
+__pycache__/
+**__pycache__/
+*.py[cod]
+*.pyo
+*.pot
+*.pyc
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.pyre/
+.coverage
+coverage.xml
+
+# ==============================
+# Virtual Environments
+# ==============================
+venv/
+.venv/
+env/
+.env/
+
+# ==============================
+# Environment Variables
+# ==============================
+.env
+.env.*
+*.env
+
+# ==============================
+# Django Specific
+# ==============================
+*.log
+db.sqlite3
+*.sqlite3
+media/
+
+
+# ==============================
+# Django Migrations (optional)
+# ==============================
+# Uncomment if you want to ignore auto migrations
+# */migrations/0*.py
+# */migrations/__pycache__/
+
+# ==============================
+# IDE / Editor
+# ==============================
+.vscode/
