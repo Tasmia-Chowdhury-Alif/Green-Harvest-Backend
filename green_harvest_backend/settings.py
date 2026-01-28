@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar',
 
     # Internal Apps
+    'core',
     'users',
 ]
 
