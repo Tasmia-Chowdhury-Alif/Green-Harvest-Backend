@@ -22,7 +22,7 @@ class Profile(models.Model):
     image = CloudinaryField(
         "image",
         folder="Green_Harvest/users/",
-        transformation=[{"width": 800, "height": 800, "crop": "limit"}],
+        transformation=[{"width": 800, "height": 800, "crop": "fill", "gravity": "face"}],
         null=True,
         blank=True,
     )
