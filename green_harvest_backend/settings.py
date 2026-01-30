@@ -189,11 +189,11 @@ DJOSER = {
     'EMAIL_FRONTEND_SITE_NAME': 'Green Harvest',
 
 
-    # 'SERIALIZERS': {
-        # 'user_create': 'users.serializers.RegisterSerializer',  # overrided registration serializer 
-    #     'user': 'users.serializers.CustomUserSerializer',
-    #     'current_user': 'users.serializers.CustomUserSerializer',
-    # },
+    'SERIALIZERS': {
+        'user_create': 'djoser.serializers.UserCreateSerializer',  # Default for registration
+        'user': 'users.serializers.UserProfileSerializer',  # For general user endpoints
+        'current_user': 'users.serializers.UserProfileSerializer',  # Specifically for /users/me/
+    },
     'PERMISSIONS': {
         'user_create': ['rest_framework.permissions.AllowAny'],
     },
