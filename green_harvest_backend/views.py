@@ -9,6 +9,6 @@ class ApiRootView(APIView):
         return Response({
             'Message': 'Welcome to Green Harvest API',
             'Download Schema': reverse('schema', request=request, format=format),
-            'View Swagger Documentation UI': reverse('swagger-ui', request=request, format=format),
-            'View redoc Documentation UI': reverse('redoc', request=request, format=format),
+            'Swagger Documentation UI': reverse('swagger-ui', request=request, format=format),
+            'Redoc Documentation UI': reverse('redoc', request=request, format=format),
         })
