@@ -31,6 +31,7 @@ AUTH_USER_MODEL = 'users.User'
 INSTALLED_APPS = [
     #External package 
     "mptt", # for MPTTModelAdmin
+    'django_filters',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -171,6 +172,10 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
