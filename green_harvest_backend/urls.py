@@ -12,6 +12,9 @@ urlpatterns = [
     path("api/auth/", include("djoser.urls")),  # /auth/users/, /auth/users/me/
     path("api/auth/", include("djoser.urls.jwt")),  # /auth/jwt/create/, etc.
 
+    # Products
+    path('api/', include('products.urls')),
+    
     # Swagger & Redoc
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
