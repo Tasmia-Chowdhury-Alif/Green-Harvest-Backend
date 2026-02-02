@@ -1,6 +1,7 @@
 from .models import Product, Category
 from .serializers import ProductListSerializer, ProductDetailSerializer, CategorySerializer
 from .filters import ProductFilter
+from .pagination import ProductListPagination
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -80,6 +81,7 @@ from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParamete
 )
 class ProductListView(ListAPIView):
     serializer_class = ProductListSerializer
+    pagination_class = ProductListPagination 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
     search_fields = ['^name', 'description', '^category__name', '^brand__name', '^tags__name']  # ^ for starts-with (common practice for better search relevance)
