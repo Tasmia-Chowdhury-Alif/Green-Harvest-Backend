@@ -29,6 +29,7 @@ AUTH_USER_MODEL = 'users.User'
 
 INSTALLED_APPS = [
     #External package 
+    "whitenoise.runserver_nostatic",
     "mptt", # for MPTTModelAdmin
     'django_filters',
 
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
