@@ -88,7 +88,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'green_harvest_backend.wsgi.application'
+WSGI_APPLICATION = 'green_harvest_backend.wsgi.app'
 
 
 # Database
