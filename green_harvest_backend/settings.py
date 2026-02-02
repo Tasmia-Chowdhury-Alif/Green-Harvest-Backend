@@ -4,7 +4,6 @@ from datetime import timedelta
 import cloudinary
 
 
-
 env = environ.Env()
 environ.Env.read_env()
 
@@ -239,6 +238,16 @@ SPECTACULAR_SETTINGS = {
         'requiredPropsFirst': True,
         'showExtensions': True,
     },
+    'TAGS': [
+        {
+            'name': 'auth',
+            'description': 'Endpoints for user authentication, registration, and management (powered by Djoser and JWT).'
+        },
+        {
+            'name': 'products',
+            'description': 'Endpoints for products, categories, and related operations.'
+        },
+    ],
     'TAGS_SORTER': 'alpha',
     'OPERATIONS_SORTER': 'method',
     'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
@@ -246,7 +255,10 @@ SPECTACULAR_SETTINGS = {
     'SORT_OPERATION_PARAMETERS': True,
     'CAMELIZE_NAMES': False,
     'SECURITY': [],
-    'POSTPROCESSING_HOOKS': ['drf_spectacular.hooks.postprocess_schema_enums'],
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'green_harvest_backend.hooks.custom_tag_generator',  # Custom hook for tag assignment
+    ],
     'ENABLE_DJANGO_DEPLOY_CHECK': True,
 }
 
