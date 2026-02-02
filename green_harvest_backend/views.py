@@ -7,8 +7,8 @@ class ApiRootView(APIView):
     @extend_schema(exclude=True)  # Excludes from schema
     def get(self, request, format=None):
         return Response({
-            'message': 'Welcome to Green Harvest API',
-            'schema': reverse('schema', request=request, format=format),
-            'swagger': reverse('swagger-ui', request=request, format=format),
-            'redoc': reverse('redoc', request=request, format=format),
+            'Message': 'Welcome to Green Harvest API',
+            'Download Schema': reverse('schema', request=request, format=format),
+            'Swagger Documentation UI': reverse('swagger-ui', request=request, format=format),
+            'Redoc Documentation UI': reverse('redoc', request=request, format=format),
         })

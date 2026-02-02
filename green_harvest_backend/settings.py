@@ -4,7 +4,6 @@ from datetime import timedelta
 import cloudinary
 
 
-
 env = environ.Env()
 environ.Env.read_env()
 
@@ -29,6 +28,10 @@ AUTH_USER_MODEL = 'users.User'
 # Application definition
 
 INSTALLED_APPS = [
+    #External package 
+    "mptt", # for MPTTModelAdmin
+    'django_filters',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,8 +47,8 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar',
 
     # Internal Apps
-    'core.apps.CoreConfig',
-    'users',
+    'users.apps.UsersConfig',
+    'products.apps.ProductsConfig',
 ]
 
 MIDDLEWARE = [
@@ -115,8 +118,6 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Dhaka'
 
-TIME_ZONE = 'UTC'
-
 USE_I18N = True
 
 USE_TZ = True
@@ -159,10 +160,23 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
@@ -224,6 +238,16 @@ SPECTACULAR_SETTINGS = {
         'requiredPropsFirst': True,
         'showExtensions': True,
     },
+    'TAGS': [
+        {
+            'name': 'auth',
+            'description': 'Endpoints for user authentication, registration, and management (powered by Djoser and JWT).'
+        },
+        {
+            'name': 'products',
+            'description': 'Endpoints for products, categories, and related operations.'
+        },
+    ],
     'TAGS_SORTER': 'alpha',
     'OPERATIONS_SORTER': 'method',
     'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
@@ -231,7 +255,10 @@ SPECTACULAR_SETTINGS = {
     'SORT_OPERATION_PARAMETERS': True,
     'CAMELIZE_NAMES': False,
     'SECURITY': [],
-    'POSTPROCESSING_HOOKS': ['drf_spectacular.hooks.postprocess_schema_enums'],
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'green_harvest_backend.hooks.custom_tag_generator',  # Custom hook for tag assignment
+    ],
     'ENABLE_DJANGO_DEPLOY_CHECK': True,
 }
 
