@@ -1,8 +1,11 @@
+from datetime import timezone
+from .models import Product, ProductImage, Category, Tag, Brand, Review
+from users.models import User
 from rest_framework import serializers
-from .models import Product, ProductImage, Category
 from drf_spectacular.utils import extend_schema_field
-from typing import Optional, Dict, Any, List
 from drf_spectacular.types import OpenApiTypes
+from django.utils.timesince import timesince
+from django.utils import timezone
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -47,8 +50,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'slug', 'name', 'sku', 'current_price', 'original_price', 'discount_percentage', 'average_rating', 'reviews_count', 'stock_status', 'category', 'description', 'additional_info', 'images']
 
+
 class CategorySerializer(serializers.ModelSerializer):
     product_count = serializers.SerializerMethodField()
+    children = serializers.SerializerMethodField()  # Recursive for tree structure
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_product_count(self, obj):
@@ -56,7 +61,14 @@ class CategorySerializer(serializers.ModelSerializer):
         descendants = obj.get_descendants(include_self=True)
         return Product.objects.filter(category__in=descendants).count()
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_children(self, obj):
+        if obj.is_leaf_node():
+            return []
+        return CategorySerializer(obj.get_children(), many=True).data
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'product_count']
+        fields = ['id', 'name', 'slug', 'product_count', 'children']
+
 
