@@ -261,3 +261,123 @@ class BrandListView(ListAPIView):
     serializer_class = BrandSerializer
 
 
+@extend_schema(
+    tags=["Reviews"],
+    summary="List reviews for a product",
+    description=(
+        "Retrieve paginated reviews for a specific product by ID. Supports pagination for 'load more' functionality "
+        "(e.g., ?page=2). Each review includes user image, full name, rating, comment, and formatted time (e.g., '5 min ago' or date)."
+    ),
+    parameters=[
+        OpenApiParameter(
+            name='product_id',
+            type=int,
+            location=OpenApiParameter.PATH,
+            required=True,
+            description="ID of the product to fetch reviews for."
+        ),
+    ],
+    responses=ReviewSerializer(many=True),
+    examples=[
+        OpenApiExample(
+            name="Sample Reviews Response",
+            value=[
+                {
+                    "id": 1,
+                    "user": {"full_name": "John Doe", "image": "https://res.cloudinary.com/.../user.jpg"},
+                    "rating": 5,
+                    "comment": "Great product!",
+                    "created_at": "2 hours ago"
+                },
+                {
+                    "id": 2,
+                    "user": {"full_name": "Jane Smith", "image": None},
+                    "rating": 4,
+                    "comment": "Good quality.",
+                    "created_at": "2026-01-15"
+                }
+            ],
+            response_only=True,
+        )
+    ]
+)
+class ReviewListView(ListAPIView):
+    serializer_class = ReviewSerializer
+    pagination_class = ProductListPagination  # page-based for load more
+
+    def get_queryset(self):
+        product_id = self.kwargs['product_id']
+        return Review.objects.filter(product_id=product_id).select_related('user', 'user__profile').order_by('-created_at')
+
+
+@extend_schema(
+    tags=["Reviews"],
+    summary="Create a review for a product",
+    description=(
+        "Authenticated users can submit one review per product.\n"
+        "Duplicate reviews are prevented."
+    ),
+    request=ReviewWriteSerializer,
+    responses={
+        201: ReviewSerializer,
+        400: OpenApiResponse(description="Validation error or already reviewed")
+    },
+)
+class ReviewCreateView(generics.CreateAPIView):
+    """
+    POST: Create a new review for a product (authenticated user only)
+    """
+    serializer_class = ReviewWriteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        product = get_object_or_404(Product, id=self.kwargs['product_id'])
+        # Prevent duplicate reviews (one per user per product)
+        if Review.objects.filter(product=product, user=self.request.user).exists():
+            raise ValidationError({"detail": "You have already reviewed this product."})
+        
+        serializer.save(
+            product=product,
+            user=self.request.user
+        )
+
+@extend_schema(
+    tags=["Reviews"],
+    summary="Retrieve, update or delete a review",
+    description=(
+        "• **GET**: Retrieve details of a specific review\n"
+        "• **PUT / PATCH**: Update your own review (rating and/or comment)\n"
+        "• **DELETE**: Delete your own review\n\n"
+        "Only the review's author can modify or delete it."
+    ),
+    request=ReviewWriteSerializer,          # for PUT/PATCH
+    responses={
+        200: ReviewSerializer,
+        204: OpenApiResponse(description="Review deleted successfully"),
+        403: OpenApiResponse(description="You do not have permission (not the owner)"),
+        404: OpenApiResponse(description="Review not found"),
+    },
+    methods=["GET", "PUT", "PATCH", "DELETE"]   # important for multi-method view
+)
+class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET: Retrieve a single review (if public/owned)
+    PUT/PATCH: Update review (only owner)
+    DELETE: Delete review (only owner)
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer  # read serializer
+    permission_classes = [IsAuthenticated, IsReviewOwnerOrReadOnly]
+    lookup_field = 'id'  # or 'pk'
+
+    def get_queryset(self):
+        # Optional: can restrict to product if needed
+        product_id = self.kwargs.get('product_id')
+        if product_id:
+            return super().get_queryset().filter(product_id=product_id)
+        return super().get_queryset()
+
+    def perform_destroy(self, instance):
+        # Optional: extra logic before delete
+        super().perform_destroy(instance)
+
