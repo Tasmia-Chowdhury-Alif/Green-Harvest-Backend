@@ -215,3 +215,49 @@ class CategoryLeafListView(ListAPIView):
         return Category.objects.filter(rght=F('lft') + 1)
 
 
+@extend_schema(
+    tags=["Tags"],
+    summary="List all tags",
+    description="Retrieve a list of all tags used for products.",
+    responses=TagSerializer(many=True),
+    examples=[
+        OpenApiExample(
+            name="Sample Tags Response",
+            value=[
+                {"id": 1, "name": "organic", "slug": "organic"},
+                {"id": 2, "name": "fresh", "slug": "fresh"}
+            ],
+            response_only=True,
+        )
+    ]
+)
+class TagListView(ListAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
+
+
+@extend_schema(
+    tags=["Brands"],
+    summary="List all brands",
+    description="Retrieve a list of all brands with their images.",
+    responses=BrandSerializer(many=True),
+    examples=[
+        OpenApiExample(
+            name="Sample Brands Response",
+            value=[
+                {
+                    "id": 1, "name": "Organic Farms", 
+                    "image": "https://res.cloudinary.com/.../organic-farms-logo.jpg"
+                },
+                {"id": 2, "name": "Fresh Harvest", "image": None}
+            ],
+            response_only=True,
+        )
+    ]
+)
+class BrandListView(ListAPIView):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
+
+
