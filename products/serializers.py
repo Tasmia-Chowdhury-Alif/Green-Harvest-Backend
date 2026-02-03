@@ -99,3 +99,42 @@ class BrandSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'image']
 
 
+class UserReviewSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    image = serializers.CharField(source='profile.image.url', allow_null=True, default=None)
+
+    def get_full_name(self, obj):
+        full_name = f"{obj.first_name} {obj.last_name}".strip()
+        return full_name if full_name else obj.email
+
+    class Meta:
+        model = User
+        fields = ['full_name', 'image']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user = UserReviewSerializer(read_only=True)
+    created_at = serializers.SerializerMethodField()
+
+    def get_created_at(self, obj):
+        now = timezone.now()
+        delta = now - obj.created_at
+        if delta.days == 0:
+            return timesince(obj.created_at) + ' ago'
+        elif delta.days < 8:
+            return f"{delta.days} days ago"
+        else:
+            return obj.created_at.strftime('%Y-%m-%d')
+
+    class Meta:
+        model = Review
+        fields = ['id', 'user', 'rating', 'comment', 'created_at']
+
+
+class ReviewWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']  # user and product are set in view
+        extra_kwargs = {
+            'rating': {'required': True},
+        }
