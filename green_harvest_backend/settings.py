@@ -258,12 +258,28 @@ SPECTACULAR_SETTINGS = {
     },
     'TAGS': [
         {
-            'name': 'auth',
+            'name': 'Auth',
             'description': 'Endpoints for user authentication, registration, and management (powered by Djoser and JWT).'
         },
         {
-            'name': 'products',
+            'name': 'Products',
             'description': 'Endpoints for products, categories, and related operations.'
+        },
+        {
+            'name': 'Categories',
+            'description': 'Category hierarchy, leaf categories, and product counts.'
+        },
+        {
+            'name': 'Brands',
+            'description': 'Product brands and brand metadata.'
+        },
+        {
+            'name': 'Tags',
+            'description': 'Product tags used for filtering and labeling.'
+        },
+        {
+            'name': 'Reviews',
+            'description': 'Product reviews: list, create, update, and delete.'
         },
     ],
     'TAGS_SORTER': 'alpha',
