@@ -72,3 +72,16 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'product_count', 'children']
 
 
+class CategoryLeafSerializer(serializers.ModelSerializer):
+    product_count = serializers.SerializerMethodField()
+
+    @extend_schema_field(OpenApiTypes.INT)
+    def get_product_count(self, obj):
+        # For leaves, just count direct products (no descendants needed)
+        return Product.objects.filter(category=obj).count()
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'slug', 'product_count']
+
+
