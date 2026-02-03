@@ -85,3 +85,17 @@ class CategoryLeafSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'product_count']
 
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'name', 'slug']
+
+
+class BrandSerializer(serializers.ModelSerializer):
+    image = serializers.CharField(source='image.url', allow_null=True, default=None)
+
+    class Meta:
+        model = Brand
+        fields = ['id', 'name', 'image']
+
+
