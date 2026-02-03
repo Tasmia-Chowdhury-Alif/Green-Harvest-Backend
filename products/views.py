@@ -1,14 +1,25 @@
-from .models import Product, Category
-from .serializers import ProductListSerializer, ProductDetailSerializer, CategorySerializer
+from .models import Product, Category, Tag, Brand, Review
+from .serializers import (
+    ProductListSerializer, ProductDetailSerializer, CategorySerializer, 
+    CategoryLeafSerializer, ReviewWriteSerializer, TagSerializer, BrandSerializer, ReviewSerializer
+)
 from .filters import ProductFilter
 from .pagination import ProductListPagination
+from .permissions import IsReviewOwnerOrReadOnly
+from rest_framework import generics, status
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiResponse
+from django.db.models import F
+from django.shortcuts import get_object_or_404
 
 
 @extend_schema(
+    tags=["Products"],
     summary="List all products",
     description=(
         "Retrieve a paginated list of products with filtering, searching, and ordering.\n\n"
@@ -93,6 +104,7 @@ class ProductListView(ListAPIView):
 
 
 @extend_schema(
+    tags=["Products"],
     summary="Retrieve a single product",
     description="Get detailed information for a product by its slug, including images, reviews count, and additional info.",
     responses=ProductDetailSerializer,
@@ -143,21 +155,63 @@ class ProductDetailView(RetrieveAPIView):
 
 
 @extend_schema(
-    summary="List all categories",
-    description="Retrieve a list of categories with product counts (including subcategories via MPTT).",
+    tags=["Categories"],
+    summary="List all categories (hierarchical tree)",
+    description=(
+        "Retrieve a hierarchical list of categories starting from roots, with product counts (including subcategories via MPTT) "
+        "and nested children. Ideal for building nested menus or category trees in the frontend."
+    ),
     responses=CategorySerializer(many=True),
     examples=[
         OpenApiExample(
-            name="Sample Category List Response",
+            name="Sample Hierarchical Category Response",
             value=[
-                {"id": 1, "name": "Fruits", "slug": "fruits", "product_count": 25},
-                {"id": 2, "name": "Vegetables", "slug": "vegetables", "product_count": 38},
-                {"id": 3, "name": "Dairy", "slug": "dairy", "product_count": 15}
+                {
+                    "id": 1, "name": "Fruits", "slug": "fruits", "product_count": 25,
+                    "children": [
+                        {"id": 4, "name": "Apples", "slug": "apples", "product_count": 10, "children": []},
+                        {"id": 5, "name": "Berries", "slug": "berries", "product_count": 15, "children": []}
+                    ]
+                },
+                {"id": 2, "name": "Vegetables", "slug": "vegetables", "product_count": 38, "children": []},
+                {"id": 3, "name": "Dairy", "slug": "dairy", "product_count": 15, "children": []}
             ],
             response_only=True,
         )
     ]
 )
 class CategoryListView(ListAPIView):
-    queryset = Category.objects.all()  # All categories (flat; extend to tree soon)
+    queryset = Category.objects.filter(parent=None)  # Starting from root categories for tree
     serializer_class = CategorySerializer
+    pagination_class = None
+
+
+@extend_schema(
+    tags=["Categories"],
+    summary="List leaf categories (for filtering)",
+    description=(
+        "Retrieve a flat list of leaf categories (no children) with direct product counts. "
+        "Useful for product filtering UIs where only selectable end-categories are needed."
+    ),
+    responses=CategoryLeafSerializer(many=True),
+    examples=[
+        OpenApiExample(
+            name="Sample Leaf Category Response",
+            value=[
+                {"id": 4, "name": "Apples", "slug": "apples", "product_count": 10},
+                {"id": 5, "name": "Berries", "slug": "berries", "product_count": 15},
+                {"id": 6, "name": "Leafy Greens", "slug": "leafy-greens", "product_count": 20}
+            ],
+            response_only=True,
+        )
+    ]
+)
+class CategoryLeafListView(ListAPIView):
+    serializer_class = CategoryLeafSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        # Filter leaf nodes efficiently (categories with no children)
+        return Category.objects.filter(rght=F('lft') + 1)
+
+
