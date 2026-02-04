@@ -97,7 +97,7 @@ class ProductListView(ListAPIView):
     filterset_class = ProductFilter
     search_fields = ['^name', 'description', '^category__name', '^brand__name', '^tags__name']  # ^ for starts-with (common practice for better search relevance)
     ordering_fields = ['created_at', 'current_price', 'average_rating', 'name']
-    ordering = ['-created_at']  # Default: latest products first 
+    ordering = ['created_at']  # Default: Oldest products first 
 
     def get_queryset(self):
         return Product.objects.select_related('category', 'brand').prefetch_related('images', 'tags')
