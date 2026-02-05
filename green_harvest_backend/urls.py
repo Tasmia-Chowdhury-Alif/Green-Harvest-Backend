@@ -14,6 +14,8 @@ urlpatterns = [
 
     # Products
     path('api/', include('products.urls')),
+    path('api/cart/', include('cart.urls')),
+    path('api/wishlist/', include('wishlist.urls')),
     
     # Swagger & Redoc
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
