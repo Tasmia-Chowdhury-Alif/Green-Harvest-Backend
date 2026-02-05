@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     # Internal Apps
     'users.apps.UsersConfig',
     'products.apps.ProductsConfig',
+    'cart.apps.CartConfig',
+    'wishlist.apps.WishlistConfig',
 ]
 
 MIDDLEWARE = [
@@ -217,7 +219,7 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
 
     'EMAIL_FRONTEND_PROTOCOL': env('FRONTEND_PROTOCOL', default='https'),
-    'EMAIL_FRONTEND_DOMAIN': env('FRONTEND_DOMAIN', default='https://eco-bazar-seven.vercel.app'),
+    'EMAIL_FRONTEND_DOMAIN': env('FRONTEND_DOMAIN', default='eco-bazar-seven.vercel.app'),
     'EMAIL_FRONTEND_SITE_NAME': 'Green Harvest',
 
 
@@ -229,7 +231,7 @@ DJOSER = {
     'PERMISSIONS': {
         'user_create': ['rest_framework.permissions.AllowAny'],
     },
-    'HIDE_USERS': False,
+    'HIDE_USERS': True,
 }
 
 
@@ -258,12 +260,36 @@ SPECTACULAR_SETTINGS = {
     },
     'TAGS': [
         {
-            'name': 'auth',
+            'name': 'Auth',
             'description': 'Endpoints for user authentication, registration, and management (powered by Djoser and JWT).'
         },
         {
-            'name': 'products',
+            'name': 'Products',
             'description': 'Endpoints for products, categories, and related operations.'
+        },
+        {
+            'name': 'Categories',
+            'description': 'Category hierarchy, leaf categories, and product counts.'
+        },
+        {
+            'name': 'Brands',
+            'description': 'Product brands and brand metadata.'
+        },
+        {
+            'name': 'Tags',
+            'description': 'Product tags used for filtering and labeling.'
+        },
+        {
+            'name': 'Reviews',
+            'description': 'Product reviews: list, create, update, and delete.'
+        },
+        {
+            'name': 'Cart',
+            'description': 'Endpoints for managing user carts: add, update, remove items, and view totals.'
+        },
+        {
+            'name': 'Wishlist',
+            'description': 'Endpoints for managing user wishlists: add, remove, and view items.'
         },
     ],
     'TAGS_SORTER': 'alpha',

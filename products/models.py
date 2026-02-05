@@ -73,7 +73,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["created_at"]
         indexes = [models.Index(fields=['slug', 'category', 'brand'])]
 
     def __str__(self):
