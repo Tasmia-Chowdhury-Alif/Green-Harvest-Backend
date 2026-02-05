@@ -18,6 +18,7 @@ class ImageSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()  # Only primary image
     stock_status = serializers.CharField(read_only=True) 
+    category = serializers.SerializerMethodField()
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_images(self, obj):
@@ -25,10 +26,14 @@ class ProductListSerializer(serializers.ModelSerializer):
         if primary:
             return ImageSerializer(primary).data
         return None
+    
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_category(self, obj):
+        return obj.category.name
 
     class Meta:
         model = Product
-        fields = ['id', 'slug', 'name', 'current_price', 'original_price', 'discount_percentage', 'average_rating', 'stock_status', 'images']
+        fields = ['id', 'slug', 'name', 'current_price', 'original_price', 'discount_percentage', 'average_rating', 'stock_status', 'category', 'images']
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     stock_status = serializers.CharField(read_only=True) 
