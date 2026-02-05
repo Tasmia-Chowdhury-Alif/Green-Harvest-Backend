@@ -219,7 +219,7 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
 
     'EMAIL_FRONTEND_PROTOCOL': env('FRONTEND_PROTOCOL', default='https'),
-    'EMAIL_FRONTEND_DOMAIN': env('FRONTEND_DOMAIN', default='https://eco-bazar-seven.vercel.app'),
+    'EMAIL_FRONTEND_DOMAIN': env('FRONTEND_DOMAIN', default='eco-bazar-seven.vercel.app'),
     'EMAIL_FRONTEND_SITE_NAME': 'Green Harvest',
 
 
