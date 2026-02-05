@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     # Internal Apps
     'users.apps.UsersConfig',
     'products.apps.ProductsConfig',
+    'cart.apps.CartConfig',
+    'wishlist.apps.WishlistConfig',
 ]
 
 MIDDLEWARE = [
@@ -229,7 +231,7 @@ DJOSER = {
     'PERMISSIONS': {
         'user_create': ['rest_framework.permissions.AllowAny'],
     },
-    'HIDE_USERS': False,
+    'HIDE_USERS': True,
 }
 
 
@@ -280,6 +282,14 @@ SPECTACULAR_SETTINGS = {
         {
             'name': 'Reviews',
             'description': 'Product reviews: list, create, update, and delete.'
+        },
+        {
+            'name': 'Cart',
+            'description': 'Endpoints for managing user carts: add, update, remove items, and view totals.'
+        },
+        {
+            'name': 'Wishlist',
+            'description': 'Endpoints for managing user wishlists: add, remove, and view items.'
         },
     ],
     'TAGS_SORTER': 'alpha',
