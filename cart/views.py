@@ -76,28 +76,30 @@ class CartViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
-        summary="Update cart item quantity",
+        summary="Update cart item quantity (send 'id' and 'quantity' in request body)",
+        description="Requires JSON body with 'id' (item ID) and 'quantity' (new value).",
         request=CartItemUpdateSerializer,
-        parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location=OpenApiParameter.QUERY, description='Item ID', required=True),
-            OpenApiParameter(name='quantity', type=OpenApiTypes.INT, location=OpenApiParameter.QUERY, description='New quantity', required=True),
-        ],
         responses={
-            200: OpenApiResponse(description="Quantity updated"),
+            200: CartItemUpdateSerializer,
             400: OpenApiResponse(description="Invalid quantity or insufficient stock"),
+            404: OpenApiResponse(description="Item not found"),
         },
         tags=['Cart']
     )
     @action(detail=False, methods=['patch'], url_path='update')
     def update_item(self, request):
-        serializer = CartItemUpdateSerializer(data=request.data)
+        item_id = request.data.get('id')
+        if not item_id:
+            return Response({'error': 'id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        item = get_object_or_404(CartItem, id=item_id, cart=request.user.cart)
+
+        serializer = CartItemUpdateSerializer(instance=item, data=request.data, partial=True)
         if serializer.is_valid():
-            item_id = serializer.validated_data['id']
             quantity = serializer.validated_data['quantity']
-            item = get_object_or_404(CartItem, id=item_id, cart=request.user.cart)
-            # Validation already in serializer
-            item.quantity = quantity
-            item.save()
+            if quantity > item.product.stock_count:
+                return Response({'error': f"Not enough stock available for {item.product.name}"}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
