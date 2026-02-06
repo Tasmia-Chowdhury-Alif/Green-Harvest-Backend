@@ -24,6 +24,9 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 class CartItemUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating cart item quantity."""
+    id = serializers.IntegerField(help_text="The ID of the cart item to update", required=True)
+    quantity = serializers.IntegerField(min_value=0, help_text="New quantity for the cart item", required=True)
+
     class Meta:
         model = CartItem
         fields = ["id", "quantity"]
@@ -31,10 +34,6 @@ class CartItemUpdateSerializer(serializers.ModelSerializer):
     def validate_quantity(self, quantity):
         if quantity < 0:
             raise serializers.ValidationError("Quantity cannot be negative.")
-
-        if quantity > self.instance.product.stock_count:
-            raise serializers.ValidationError("Not enough stock available.")
-        
         return quantity
 
 class CartSerializer(serializers.ModelSerializer):
