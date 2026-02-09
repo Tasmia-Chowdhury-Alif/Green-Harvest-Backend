@@ -1,8 +1,5 @@
 from .models import Product, Category, Tag, Brand, Review
-from .serializers import (
-    ProductListSerializer, ProductDetailSerializer, CategorySerializer, 
-    CategoryLeafSerializer, ReviewWriteSerializer, TagSerializer, BrandSerializer, ReviewSerializer
-)
+from .serializers import (ProductListSerializer, ProductDetailSerializer, CategorySerializer, CategoryLeafSerializer, ReviewWriteSerializer, TagSerializer, BrandSerializer, ReviewSerializer,)
 from .filters import ProductFilter
 from .pagination import ProductListPagination
 from .permissions import IsReviewOwnerOrReadOnly
@@ -35,10 +32,9 @@ from django.shortcuts import get_object_or_404
         "  ?ordering=name                 → alphabetical A-Z"
     ),
     # parameters=[],  # Auto-detected by spectacular (e.g., ?search=, ?ordering=, filters from ProductFilter)
-
     parameters=[
         OpenApiParameter(
-            name='ordering',
+            name="ordering",
             type=str,
             location=OpenApiParameter.QUERY,
             required=False,
@@ -46,53 +42,53 @@ from django.shortcuts import get_object_or_404
         ),
     ],
     responses={
-    200: OpenApiResponse(
-        description="Paginated list of products",
-    response=ProductListSerializer(many=True),
-    examples=[
-        OpenApiExample(
-            "Successful response example",
-            value={
-                "count": 42,
-                "next": "http://127.0.0.1:8000/api/products/?page=2",
-                "previous": None,
-                "results": [
-                    {
-                        "id": 15,
-                        "slug": "organic-red-apples-1kg",
-                        "name": "Organic Red Apples 1kg",
-                        "current_price": "320.00",
-                        "original_price": "380.00",
-                        "discount_percentage": 15.79,
-                        "average_rating": 4.6,
-                        "stock_status": "IN_STOCK",
-                        "images": {
-                            "image": "https://res.cloudinary.com/.../apples-primary.jpg",
-                            "alt_text": "Fresh organic red apples",
-                            "is_primary": True
-                        }
+        200: OpenApiResponse(
+            description="Paginated list of products",
+            response=ProductListSerializer(many=True),
+            examples=[
+                OpenApiExample(
+                    "Successful response example",
+                    value={
+                        "count": 42,
+                        "next": "http://127.0.0.1:8000/api/products/?page=2",
+                        "previous": None,
+                        "results": [
+                            {
+                                "id": 15,
+                                "slug": "organic-red-apples-1kg",
+                                "name": "Organic Red Apples 1kg",
+                                "current_price": "320.00",
+                                "original_price": "380.00",
+                                "discount_percentage": 15.79,
+                                "average_rating": 4.6,
+                                "stock_status": "IN_STOCK",
+                                "images": {
+                                    "image": "https://res.cloudinary.com/.../apples-primary.jpg",
+                                    "alt_text": "Fresh organic red apples",
+                                    "is_primary": True,
+                                },
+                            },
+                            {
+                                "id": 7,
+                                "slug": "banana-cavendish-1kg",
+                                "name": "Banana Cavendish 1kg",
+                                "current_price": "180.00",
+                                "original_price": "180.00",
+                                "discount_percentage": None,
+                                "average_rating": 4.2,
+                                "stock_status": "IN_STOCK",
+                                "images": None,
+                            },
+                        ],
                     },
-                    {
-                        "id": 7,
-                        "slug": "banana-cavendish-1kg",
-                        "name": "Banana Cavendish 1kg",
-                        "current_price": "180.00",
-                        "original_price": "180.00",
-                        "discount_percentage": None,
-                        "average_rating": 4.2,
-                        "stock_status": "IN_STOCK",
-                        "images": None
-                    }
-                ]
-            }
+                )
+            ],
         )
-    ]
-)
-}
+    },
 )
 class ProductListView(ListAPIView):
     serializer_class = ProductListSerializer
-    pagination_class = ProductListPagination 
+    pagination_class = ProductListPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
     search_fields = ['^name', 'description', '^category__name', '^brand__name', '^tags__name']  # ^ for starts-with (common practice for better search relevance)
@@ -129,29 +125,29 @@ class ProductListView(ListAPIView):
                     "color": "Red",
                     "type": "Fruit",
                     "stock_count": 150,
-                    "tags": ["organic", "fresh", "sweet"]
+                    "tags": ["organic", "fresh", "sweet"],
                 },
                 "images": [
                     {
                         "image": "https://res.cloudinary.com/yourcloud/image/upload/v1/greenharvest_images/products/apple1.jpg",
                         "alt_text": "Front view",
-                        "is_primary": True
+                        "is_primary": True,
                     },
                     {
                         "image": "https://res.cloudinary.com/yourcloud/image/upload/v1/greenharvest_images/products/apple2.jpg",
                         "alt_text": "Side view",
-                        "is_primary": False
-                    }
-                ]
+                        "is_primary": False,
+                    },
+                ],
             },
             response_only=True,
         )
-    ]
+    ],
 )
 class ProductDetailView(RetrieveAPIView):
     queryset = Product.objects.select_related('category', 'brand').prefetch_related('images', 'tags')
     serializer_class = ProductDetailSerializer
-    lookup_field = 'slug'
+    lookup_field = "slug"
 
 
 @extend_schema(
@@ -178,7 +174,7 @@ class ProductDetailView(RetrieveAPIView):
             ],
             response_only=True,
         )
-    ]
+    ],
 )
 class CategoryListView(ListAPIView):
     queryset = Category.objects.filter(parent=None)  # Starting from root categories for tree
@@ -204,7 +200,7 @@ class CategoryListView(ListAPIView):
             ],
             response_only=True,
         )
-    ]
+    ],
 )
 class CategoryLeafListView(ListAPIView):
     serializer_class = CategoryLeafSerializer
@@ -212,7 +208,7 @@ class CategoryLeafListView(ListAPIView):
 
     def get_queryset(self):
         # Filter leaf nodes efficiently (categories with no children)
-        return Category.objects.filter(rght=F('lft') + 1)
+        return Category.objects.filter(rght=F("lft") + 1)
 
 
 @extend_schema(
@@ -225,11 +221,11 @@ class CategoryLeafListView(ListAPIView):
             name="Sample Tags Response",
             value=[
                 {"id": 1, "name": "organic", "slug": "organic"},
-                {"id": 2, "name": "fresh", "slug": "fresh"}
+                {"id": 2, "name": "fresh", "slug": "fresh"},
             ],
             response_only=True,
         )
-    ]
+    ],
 )
 class TagListView(ListAPIView):
     queryset = Tag.objects.all()
@@ -250,11 +246,11 @@ class TagListView(ListAPIView):
                     "id": 1, "name": "Organic Farms", 
                     "image": "https://res.cloudinary.com/.../organic-farms-logo.jpg"
                 },
-                {"id": 2, "name": "Fresh Harvest", "image": None}
+                {"id": 2, "name": "Fresh Harvest", "image": None},
             ],
             response_only=True,
         )
-    ]
+    ],
 )
 class BrandListView(ListAPIView):
     queryset = Brand.objects.all()
@@ -270,11 +266,11 @@ class BrandListView(ListAPIView):
     ),
     parameters=[
         OpenApiParameter(
-            name='product_id',
+            name="product_id",
             type=int,
             location=OpenApiParameter.PATH,
             required=True,
-            description="ID of the product to fetch reviews for."
+            description="ID of the product to fetch reviews for.",
         ),
     ],
     responses=ReviewSerializer(many=True),
@@ -294,16 +290,18 @@ class BrandListView(ListAPIView):
                     "user": {"full_name": "Jane Smith", "image": None},
                     "rating": 4,
                     "comment": "Good quality.",
-                    "created_at": "2026-01-15"
-                }
+                    "created_at": "2026-01-15",
+                },
             ],
             response_only=True,
         )
-    ]
+    ],
 )
 class ReviewListView(ListAPIView):
     serializer_class = ReviewSerializer
+    queryset = Review.objects.none()
     pagination_class = ProductListPagination  # page-based for load more
+    filter_backends = []
 
     def get_queryset(self):
         product_id = self.kwargs['product_id']
@@ -320,26 +318,25 @@ class ReviewListView(ListAPIView):
     request=ReviewWriteSerializer,
     responses={
         201: ReviewSerializer,
-        400: OpenApiResponse(description="Validation error or already reviewed")
+        400: OpenApiResponse(description="Validation error or already reviewed"),
     },
 )
 class ReviewCreateView(generics.CreateAPIView):
     """
     POST: Create a new review for a product (authenticated user only)
     """
+
     serializer_class = ReviewWriteSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        product = get_object_or_404(Product, id=self.kwargs['product_id'])
+        product = get_object_or_404(Product, id=self.kwargs["product_id"])
         # Prevent duplicate reviews (one per user per product)
         if Review.objects.filter(product=product, user=self.request.user).exists():
             raise ValidationError({"detail": "You have already reviewed this product."})
-        
-        serializer.save(
-            product=product,
-            user=self.request.user
-        )
+
+        serializer.save(product=product, user=self.request.user)
+
 
 @extend_schema(
     tags=["Reviews"],
@@ -350,14 +347,14 @@ class ReviewCreateView(generics.CreateAPIView):
         "• **DELETE**: Delete your own review\n\n"
         "Only the review's author can modify or delete it."
     ),
-    request=ReviewWriteSerializer,          # for PUT/PATCH
+    request=ReviewWriteSerializer,  # for PUT/PATCH
     responses={
         200: ReviewSerializer,
         204: OpenApiResponse(description="Review deleted successfully"),
         403: OpenApiResponse(description="You do not have permission (not the owner)"),
         404: OpenApiResponse(description="Review not found"),
     },
-    methods=["GET", "PUT", "PATCH", "DELETE"]   # important for multi-method view
+    methods=["GET", "PUT", "PATCH", "DELETE"],  # important for multi-method view
 )
 class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -365,14 +362,15 @@ class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     PUT/PATCH: Update review (only owner)
     DELETE: Delete review (only owner)
     """
+
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer  # read serializer
     permission_classes = [IsAuthenticated, IsReviewOwnerOrReadOnly]
-    lookup_field = 'id'  # or 'pk'
+    lookup_field = "id"  # or 'pk'
 
     def get_queryset(self):
         # Optional: can restrict to product if needed
-        product_id = self.kwargs.get('product_id')
+        product_id = self.kwargs.get("product_id")
         if product_id:
             return super().get_queryset().filter(product_id=product_id)
         return super().get_queryset()
