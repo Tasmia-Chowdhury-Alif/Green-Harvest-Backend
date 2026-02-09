@@ -108,6 +108,7 @@ class UserReviewSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     image = serializers.CharField(source='profile.image.url', allow_null=True, default=None)
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_full_name(self, obj):
         full_name = f"{obj.first_name} {obj.last_name}".strip()
         return full_name if full_name else obj.email
@@ -121,6 +122,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     user = UserReviewSerializer(read_only=True)
     created_at = serializers.SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_created_at(self, obj):
         now = timezone.now()
         delta = now - obj.created_at
