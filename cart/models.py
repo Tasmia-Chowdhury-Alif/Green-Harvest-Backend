@@ -1,12 +1,18 @@
 from django.db import models
 from django.conf import settings
 from products.models import Product
+from decimal import Decimal
+
 
 class Cart(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cart')
 
     def __str__(self):
         return f"Cart for {self.user.email}"
+    
+    @property
+    def total(self):
+        return sum((item.subtotal for item in self.items.all()), start=Decimal('0'))
 
 
 class CartItem(models.Model):
@@ -24,4 +30,5 @@ class CartItem(models.Model):
 
     @property
     def subtotal(self):
-        return self.quantity * self.product.current_price
+        return Decimal(self.quantity) * self.product.current_price
+    
