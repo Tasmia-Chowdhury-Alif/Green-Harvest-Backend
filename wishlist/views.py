@@ -12,12 +12,14 @@ from drf_spectacular.types import OpenApiTypes
 
 @extend_schema_view(
     list=extend_schema(
-        summary="Retrieve current user's wishlist", 
-        tags=['Wishlist']),
+        summary="Retrieve current user's wishlist",
+        tags=['Wishlist'],
         responses={200: WishlistSerializer(many=False)}
+    )
 )
 class WishlistViewSet(viewsets.ModelViewSet):
     serializer_class = WishlistSerializer
+    queryset = Wishlist.objects.none()
     permission_classes = [IsAuthenticated]
     pagination_class = None
     filter_backends = []
