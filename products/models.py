@@ -5,6 +5,7 @@ from cloudinary.models import CloudinaryField
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
+from decimal import Decimal
 
 # Choices for stock status
 class StockStatus(models.TextChoices):
@@ -54,12 +55,12 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=250, unique=True)
     sku = models.CharField(max_length=50, unique=True, blank=True)
-    original_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    original_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
     discount_percentage = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
+        validators=[MinValueValidator(Decimal('0')), MaxValueValidator(Decimal('100'))]
     )
-    current_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) 
+    current_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(Decimal('0'))]) 
     average_rating = models.FloatField(default=0.0)
     reviews_count = models.IntegerField(default=0)
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
@@ -85,7 +86,9 @@ class Product(models.Model):
             self.sku = f"GH-{uuid.uuid4().hex[:8].upper()}"
         # Compute current_price (simple save-based)
         if self.discount_percentage is not None:
-            self.current_price = round(self.original_price * (1 - self.discount_percentage / 100), 2)
+            discount_rate = self.discount_percentage / Decimal('100')
+            discounted_price = self.original_price * (Decimal('1') - discount_rate)
+            self.current_price = discounted_price.quantize(Decimal('0.01'))  # Precise rounding
         else:
             self.current_price = self.original_price
         super().save(*args, **kwargs)
