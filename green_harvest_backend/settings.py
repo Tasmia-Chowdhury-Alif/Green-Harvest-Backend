@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'products.apps.ProductsConfig',
     'cart.apps.CartConfig',
     'wishlist.apps.WishlistConfig',
+    'orders',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -99,9 +101,7 @@ DATABASE_ENGINE = env.str("DATABASE_ENGINE", default="sqlite").lower()
 
 if DATABASE_ENGINE == "postgresql":
     DATABASES = {
-        "default": dj_database_url.parse(
-            env("DATABASE_URL", default="")
-        )
+        "default": dj_database_url.parse(env("DATABASE_URL"))
     }
 else:
     DATABASES = {
@@ -169,6 +169,14 @@ cloudinary.config(
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# api base URL
+BASE_URL = env("BASE_URL")
+
+# frontend base URL
+FRONTEND_BASE = env("FRONTEND_BASE")
+
+BDT_FALLBACK_RATE = env("BDT_FALLBACK_RATE")
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -292,6 +300,14 @@ SPECTACULAR_SETTINGS = {
             'name': 'Wishlist',
             'description': 'Endpoints for managing user wishlists: add, remove, and view items.'
         },
+        {
+            'name': 'Orders',
+            'description': 'Endpoints for managing user Orders'
+        },
+        {
+            'name': 'Checkout',
+            'description': 'Endpoints for Order checkout'
+        },
     ],
     'TAGS_SORTER': 'alpha',
     'OPERATIONS_SORTER': 'method',
@@ -307,4 +323,23 @@ SPECTACULAR_SETTINGS = {
     'ENABLE_DJANGO_DEPLOY_CHECK': True,
 }
 
+
+# Logging (add to the end)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
 
