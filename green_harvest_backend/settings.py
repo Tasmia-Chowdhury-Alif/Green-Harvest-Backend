@@ -188,6 +188,17 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
+# SSLCommerz Configuration
+SSLC_STORE_ID = env("SSLC_Store_ID")
+SSLC_STORE_PASS = env("SSLC_Store_Password")
+SSLC_IS_SANDBOX = True  # false when live
+
+# Stripe Configuration
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
+STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET")
+
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
