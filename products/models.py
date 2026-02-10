@@ -42,7 +42,7 @@ class Tag(models.Model):
 class Brand(models.Model):
     """Product brand model."""
     name = models.CharField(max_length=100, unique=True)
-    image = CloudinaryField('image', folder='greenharvest_images/brands', null=True, blank=True)
+    image = CloudinaryField('image', folder="Green_Harvest/brands/", null=True, blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -100,7 +100,7 @@ class Product(models.Model):
 class ProductImage(models.Model):
     """Multiple images for a product."""
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
-    image = CloudinaryField('image', folder='greenharvest_images/products', null=True, blank=True)
+    image = CloudinaryField('image', folder="Green_Harvest/products/", null=True, blank=True)
     alt_text = models.CharField(max_length=255, blank=True)  # For SEO
     is_primary = models.BooleanField(default=False)
 
