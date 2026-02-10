@@ -2,6 +2,9 @@ from rest_framework import serializers
 from .models import Cart, CartItem
 from products.serializers import ImageSerializer  # Reuse from products
 from products.models import Product
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
+
 
 class CartItemSerializer(serializers.ModelSerializer):
     product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), source="product", write_only=True)
@@ -11,6 +14,7 @@ class CartItemSerializer(serializers.ModelSerializer):
     subtotal = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
     product_image = serializers.SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_product_image(self, obj):
         primary = obj.product.images.filter(is_primary=True).first()
         if primary:
@@ -40,8 +44,9 @@ class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, read_only=True)
     total_price = serializers.SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.DECIMAL)
     def get_total_price(self, obj):
-        return sum(item.subtotal for item in obj.items.all())
+        return obj.total
 
     class Meta:
         model = Cart

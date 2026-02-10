@@ -11,10 +11,11 @@ from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiResp
 from drf_spectacular.types import OpenApiTypes
 
 
+
 @extend_schema_view(
     list=extend_schema(
-        summary="Retrieve current user's cart", 
-        tags=['Cart']), 
+        summary="Retrieve current user's cart",
+        tags=['Cart'],
         responses={
             200: OpenApiResponse(
                 response=CartSerializer(many=False),
@@ -22,10 +23,12 @@ from drf_spectacular.types import OpenApiTypes
             ),
             401: OpenApiResponse(description="Unauthorized")
         }
+    )
 )
 class CartViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
     serializer_class = CartSerializer
+    queryset = Cart.objects.none()
+    permission_classes = [IsAuthenticated]
     pagination_class = None
     filter_backends = []
 

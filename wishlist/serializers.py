@@ -2,6 +2,9 @@ from rest_framework import serializers
 from .models import Wishlist, WishlistItem
 from products.serializers import ImageSerializer
 from products.models import Product
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
+
 
 class WishlistItemSerializer(serializers.ModelSerializer):
     product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), source="product", write_only=True)
@@ -11,6 +14,7 @@ class WishlistItemSerializer(serializers.ModelSerializer):
     stock_status = serializers.CharField(source='product.stock_status', read_only=True)
     product_image = serializers.SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_product_image(self, obj):
         primary = obj.product.images.filter(is_primary=True).first()
         if primary:

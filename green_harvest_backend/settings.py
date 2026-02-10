@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'products.apps.ProductsConfig',
     'cart.apps.CartConfig',
     'wishlist.apps.WishlistConfig',
+    'orders',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -99,9 +101,7 @@ DATABASE_ENGINE = env.str("DATABASE_ENGINE", default="sqlite").lower()
 
 if DATABASE_ENGINE == "postgresql":
     DATABASES = {
-        "default": dj_database_url.parse(
-            env("DATABASE_URL", default="")
-        )
+        "default": dj_database_url.parse(env("DATABASE_URL"))
     }
 else:
     DATABASES = {
@@ -170,6 +170,14 @@ cloudinary.config(
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# api base URL
+BASE_URL = env("BASE_URL")
+
+# frontend base URL
+FRONTEND_BASE = env("FRONTEND_BASE")
+
+BDT_FALLBACK_RATE = env("BDT_FALLBACK_RATE")
+
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
@@ -178,6 +186,17 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+# SSLCommerz Configuration
+SSLC_STORE_ID = env("SSLC_Store_ID")
+SSLC_STORE_PASS = env("SSLC_Store_Password")
+SSLC_IS_SANDBOX = True  # false when live
+
+# Stripe Configuration
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
+STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET")
 
 
 CACHES = {
@@ -292,6 +311,14 @@ SPECTACULAR_SETTINGS = {
             'name': 'Wishlist',
             'description': 'Endpoints for managing user wishlists: add, remove, and view items.'
         },
+        {
+            'name': 'Orders',
+            'description': 'Endpoints for managing user Orders'
+        },
+        {
+            'name': 'Checkout',
+            'description': 'Endpoints for Order checkout'
+        },
     ],
     'TAGS_SORTER': 'alpha',
     'OPERATIONS_SORTER': 'method',
@@ -307,4 +334,23 @@ SPECTACULAR_SETTINGS = {
     'ENABLE_DJANGO_DEPLOY_CHECK': True,
 }
 
+
+# Logging (add to the end)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
 
