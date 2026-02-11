@@ -29,7 +29,7 @@ class SSLCOMMERZGateway(PaymentGateway):
             'success_url': f"{frontend}/checkout/success?order_id={order.order_id}",
             'fail_url': f"{frontend}/checkout/failed?order_id={order.order_id}",
             'cancel_url': f"{frontend}/checkout/cancel?order_id={order.order_id}",
-            'ipn_url': f"{backend}/payments/ipn/",
+            'ipn_url': f"{backend}/api/payments/ipn/",
             'cus_name': f"{order.first_name} {order.last_name}",
             'cus_email': order.email,
             'cus_phone': order.phone_number,
