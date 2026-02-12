@@ -106,6 +106,7 @@ class BrandSerializer(serializers.ModelSerializer):
 
 class UserReviewSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
     image = serializers.CharField(source='profile.image.url', allow_null=True, default=None)
 
     @extend_schema_field(OpenApiTypes.STR)
@@ -113,9 +114,13 @@ class UserReviewSerializer(serializers.ModelSerializer):
         full_name = f"{obj.first_name} {obj.last_name}".strip()
         return full_name if full_name else obj.email
 
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_email(self, obj):
+        return  obj.email
+
     class Meta:
         model = User
-        fields = ['full_name', 'image']
+        fields = ['full_name', 'email', 'image']
 
 
 class ReviewSerializer(serializers.ModelSerializer):
