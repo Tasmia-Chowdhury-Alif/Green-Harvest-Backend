@@ -35,7 +35,7 @@ class StripeGateway(PaymentGateway):
                 payment_method_types=['card'],
                 line_items=line_items,
                 mode='payment',
-                success_url=f"{frontend}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}&order_id={order.order_id}",
+                success_url=f"{frontend}/checkout/success?order_id={order.order_id}",
                 cancel_url=f"{frontend}/checkout/cancel?order_id={order.order_id}",
                 metadata={'order_id': order.order_id},
             )
