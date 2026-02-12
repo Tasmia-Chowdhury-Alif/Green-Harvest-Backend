@@ -300,7 +300,7 @@ class BrandListView(ListAPIView):
 class ReviewListView(ListAPIView):
     serializer_class = ReviewSerializer
     queryset = Review.objects.none()
-    pagination_class = ProductListPagination  # page-based for load more
+    pagination_class = None
     filter_backends = []
 
     def get_queryset(self):
