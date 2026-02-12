@@ -15,7 +15,8 @@ from orders.models import Order
 from .gateway import PaymentGateway
 from .sslcommerz_gateway import SSLCOMMERZGateway
 from .stripe_gateway import StripeGateway
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import redirect
 
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ logger = logging.getLogger(__name__)
 @method_decorator(csrf_exempt, name='dispatch')
 class IPNView(APIView):
     def post(self, request):
+        logger.info(f"SSLCOMMERZ IPN received: {request.data}")
         tran_id = request.data.get('tran_id')
         val_id = request.data.get('val_id')
         if Order.objects.filter(order_id=tran_id, payment_event_id=val_id).exists():
@@ -43,6 +45,7 @@ class IPNView(APIView):
             gateway.process_order(cart, order)
             order.payment_event_id = val_id
             order.save()
+            logger.info(f"Order {order.id} processed successfully via SSLCOMMERZ")
             return Response({'status': 'ok'}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
             return Response({'status': 'order not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -89,6 +92,29 @@ class StripeWebhookView(APIView):
 
         return Response({'status': 'unhandled event'}, status=status.HTTP_200_OK)
 
+
+
+@csrf_exempt
+def ssl_success(request):
+    if request.method == "POST":
+        order_id = request.POST.get("tran_id")
+        return redirect(f"{settings.FRONTEND_BASE}/checkout/success?order_id={order_id}")
+    return HttpResponse("Method not allowed", status=405)
+
+@csrf_exempt
+def ssl_fail(request):
+    if request.method == "POST":
+        order_id = request.POST.get("tran_id")
+        return redirect(f"{settings.FRONTEND_BASE}/checkout/failed?order_id={order_id}")
+    return HttpResponse("Method not allowed", status=405)
+
+
+@csrf_exempt
+def ssl_cancel(request):
+    if request.method == "POST":
+        order_id = request.POST.get("tran_id")
+        return redirect(f"{settings.FRONTEND_BASE}/checkout/cancelled?order_id={order_id}")
+    return HttpResponse("Method not allowed", status=405)
 
 
 # @csrf_exempt
