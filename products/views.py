@@ -280,14 +280,14 @@ class BrandListView(ListAPIView):
             value=[
                 {
                     "id": 1,
-                    "user": {"full_name": "John Doe", "image": "https://res.cloudinary.com/.../user.jpg"},
+                    "user": {"full_name": "John Doe", "email": "test1@gmail.com", "image": "https://res.cloudinary.com/.../user.jpg"},
                     "rating": 5,
                     "comment": "Great product!",
                     "created_at": "2 hours ago"
                 },
                 {
                     "id": 2,
-                    "user": {"full_name": "Jane Smith", "image": None},
+                    "user": {"full_name": "Jane Smith", "email": "test2@gmail.com", "image": None},
                     "rating": 4,
                     "comment": "Good quality.",
                     "created_at": "2026-01-15",
