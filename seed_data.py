@@ -854,7 +854,6 @@ additional_products = [
         "tags": ["Cookie", "Chocolate", "Bakery"],
         "images": [
             "https://slattery.co.uk/wp-content/uploads/2024/09/double-chocolate-cookies-pack-slattery.webp",
-            "https://i5.walmartimages.com/asr/6c8985e9-48d1-42ab-91c1-f94a3d42d717.30396a557fcb4aae974b593cfe31cda4.jpeg",
             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRG0dZwkMLGm_MPwbVOlz40BkmXtKpxne3LFw&s",
         ]
     }
