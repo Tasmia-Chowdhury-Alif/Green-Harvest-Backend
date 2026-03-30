@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import dj_database_url
 import environ
@@ -101,8 +102,12 @@ DATABASE_ENGINE = env.str("DATABASE_ENGINE", default="sqlite").lower()
 
 if DATABASE_ENGINE == "postgresql":
     DATABASES = {
-        "default": dj_database_url.parse(env("DATABASE_URL"))
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=60,          # reuse connection for 60 seconds
+        conn_health_checks=True,  # verify connection is still alive before reuse
+    )
+}
 else:
     DATABASES = {
         'default': {
@@ -199,10 +204,26 @@ STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
 STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET")
 
 
+REDIS_URL = env("REDIS_URL", default="redis://127.0.0.1:6379/1")
+
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",  # compress before storing — critical for 30mb limit
+            "COMPRESS_MIN_LEN": 512,       # only compress responses larger than 512 bytes
+            "IGNORE_EXCEPTIONS": True,     # if Redis is down, fall through to DB — don't crash
+            "SOCKET_CONNECT_TIMEOUT": 3,   # don't hang forever if Redis is unreachable
+            "SOCKET_TIMEOUT": 3,
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 10,     # RedisLabs free tier connection limit
+                "health_check_interval": 30,
+            },
+        },
+        "KEY_PREFIX": "gh",                # "gh:" prefix on all keys — avoids collisions
+        "TIMEOUT": 3600,                  # 1 hour default
     }
 }
 
