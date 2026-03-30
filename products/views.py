@@ -10,9 +10,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.db.models import F
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiResponse
 
 
 @extend_schema(
@@ -95,7 +97,13 @@ class ProductListView(ListAPIView):
     ordering_fields = ['created_at', 'current_price', 'average_rating', 'name']
     ordering = ['created_at']  # Default: Oldest products first 
 
+    @method_decorator(cache_page(60 * 60, key_prefix='product_list'))
+    def list(self, request, *args, ** kwargs):
+        return super().list(request, *args, ** kwargs)
+
     def get_queryset(self):
+        # import time
+        # time.sleep(10)
         return Product.objects.select_related('category', 'brand').prefetch_related('images', 'tags')
 
 
@@ -181,6 +189,10 @@ class CategoryListView(ListAPIView):
     serializer_class = CategorySerializer
     pagination_class = None
 
+    @method_decorator(cache_page(60 * 60, key_prefix='category_list'))
+    def list(self, request, *args, ** kwargs):
+        return super().list(request, *args, ** kwargs)
+
 
 @extend_schema(
     tags=["Categories"],
@@ -206,8 +218,13 @@ class CategoryLeafListView(ListAPIView):
     serializer_class = CategoryLeafSerializer
     pagination_class = None
 
+    @method_decorator(cache_page(60 * 60, key_prefix='category_leaf_list'))
+    def list(self, request, *args, ** kwargs):
+        return super().list(request, *args, ** kwargs)
+
     def get_queryset(self):
-        # Filter leaf nodes efficiently (categories with no children)
+        # Filter leaf nodes efficiently (categories with no children) 
+        # ToDo: ####  Make a batter approach here ()  ####
         return Category.objects.filter(rght=F("lft") + 1)
 
 
@@ -299,7 +316,6 @@ class BrandListView(ListAPIView):
 )
 class ReviewListView(ListAPIView):
     serializer_class = ReviewSerializer
-    queryset = Review.objects.none()
     pagination_class = None
     filter_backends = []
 
