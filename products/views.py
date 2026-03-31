@@ -1,5 +1,5 @@
 from .models import Product, Category, Tag, Brand, Review
-from .serializers import (ProductListSerializer, ProductDetailSerializer, CategorySerializer, CategoryLeafSerializer, ReviewWriteSerializer, TagSerializer, BrandSerializer, ReviewSerializer,)
+from .serializers import (ProductListSerializer, ProductDetailSerializer, CategorySerializer, CategoryRootSerializer, ReviewWriteSerializer, TagSerializer, BrandSerializer, ReviewSerializer,)
 from .filters import ProductFilter
 from .pagination import ProductListPagination
 from .permissions import IsReviewOwnerOrReadOnly
@@ -196,12 +196,14 @@ class CategoryListView(ListAPIView):
 
 @extend_schema(
     tags=["Categories"],
-    summary="List leaf categories (for filtering)",
+    summary="List leaf categories shop filtering",
     description=(
-        "Retrieve a flat list of leaf categories (no children) with direct product counts. "
-        "Useful for product filtering UIs where only selectable end-categories are needed."
+        "Returns top-level (root/parent) categories with product counts including all subcategories. "
+        "Recommended for the product shop page sidebar filter. "
+        "When user selects a category (by slug), the /products/ endpoint with ?category=slug "
+        "will automatically include all child products thanks to MPTT."
     ),
-    responses=CategoryLeafSerializer(many=True),
+    responses=CategoryRootSerializer(many=True),
     examples=[
         OpenApiExample(
             name="Sample Leaf Category Response",
@@ -214,18 +216,17 @@ class CategoryListView(ListAPIView):
         )
     ],
 )
-class CategoryLeafListView(ListAPIView):
-    serializer_class = CategoryLeafSerializer
+class CategoryRootListView(ListAPIView):
+    serializer_class = CategoryRootSerializer
     pagination_class = None
 
-    @method_decorator(cache_page(60 * 60, key_prefix='category_leaf_list'))
+    @method_decorator(cache_page(60 * 60, key_prefix='category_root_list'))
     def list(self, request, *args, ** kwargs):
         return super().list(request, *args, ** kwargs)
 
     def get_queryset(self):
-        # Filter leaf nodes efficiently (categories with no children) 
-        # ToDo: ####  Make a batter approach here ()  ####
-        return Category.objects.filter(rght=F("lft") + 1)
+        # Only root categories (no parent) that are active
+        return Category.objects.filter(parent=None, is_active=True)
 
 
 @extend_schema(
