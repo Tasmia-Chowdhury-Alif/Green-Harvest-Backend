@@ -196,7 +196,7 @@ class CategoryListView(ListAPIView):
 
 @extend_schema(
     tags=["Categories"],
-    summary="List leaf categories shop filtering",
+    summary="List root categories shop filtering",
     description=(
         "Returns top-level (root/parent) categories with product counts including all subcategories. "
         "Recommended for the product shop page sidebar filter. "
