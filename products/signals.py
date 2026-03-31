@@ -60,6 +60,6 @@ def _invalidate_category_caches():
     """Central function to clear all category-related cache keys."""
     try:
         cache.delete_pattern('*category_list*')
-        cache.delete_pattern('*category_leaf_list*')
+        cache.delete_pattern('*category_root_list*')
     except Exception:
         logging.getLogger(__name__).warning(f"Redis clear failed: {e}")
