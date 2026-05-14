@@ -1,5 +1,5 @@
 from .models import Product, Category, Tag, Brand, Review
-from .serializers import (ProductListSerializer, ProductDetailSerializer, CategorySerializer, CategoryLeafSerializer, ReviewWriteSerializer, TagSerializer, BrandSerializer, ReviewSerializer,)
+from .serializers import (ProductListSerializer, ProductDetailSerializer, CategorySerializer, CategoryRootSerializer, ReviewWriteSerializer, TagSerializer, BrandSerializer, ReviewSerializer,)
 from .filters import ProductFilter
 from .pagination import ProductListPagination
 from .permissions import IsReviewOwnerOrReadOnly
@@ -10,9 +10,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.db.models import F
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiResponse
 
 
 @extend_schema(
@@ -95,7 +97,13 @@ class ProductListView(ListAPIView):
     ordering_fields = ['created_at', 'current_price', 'average_rating', 'name']
     ordering = ['created_at']  # Default: Oldest products first 
 
+    @method_decorator(cache_page(60 * 60, key_prefix='product_list'))
+    def list(self, request, *args, ** kwargs):
+        return super().list(request, *args, ** kwargs)
+
     def get_queryset(self):
+        # import time
+        # time.sleep(10)
         return Product.objects.select_related('category', 'brand').prefetch_related('images', 'tags')
 
 
@@ -181,15 +189,21 @@ class CategoryListView(ListAPIView):
     serializer_class = CategorySerializer
     pagination_class = None
 
+    @method_decorator(cache_page(60 * 60, key_prefix='category_list'))
+    def list(self, request, *args, ** kwargs):
+        return super().list(request, *args, ** kwargs)
+
 
 @extend_schema(
     tags=["Categories"],
-    summary="List leaf categories (for filtering)",
+    summary="List root categories shop filtering",
     description=(
-        "Retrieve a flat list of leaf categories (no children) with direct product counts. "
-        "Useful for product filtering UIs where only selectable end-categories are needed."
+        "Returns top-level (root/parent) categories with product counts including all subcategories. "
+        "Recommended for the product shop page sidebar filter. "
+        "When user selects a category (by slug), the /products/ endpoint with ?category=slug "
+        "will automatically include all child products thanks to MPTT."
     ),
-    responses=CategoryLeafSerializer(many=True),
+    responses=CategoryRootSerializer(many=True),
     examples=[
         OpenApiExample(
             name="Sample Leaf Category Response",
@@ -202,13 +216,17 @@ class CategoryListView(ListAPIView):
         )
     ],
 )
-class CategoryLeafListView(ListAPIView):
-    serializer_class = CategoryLeafSerializer
+class CategoryRootListView(ListAPIView):
+    serializer_class = CategoryRootSerializer
     pagination_class = None
 
+    @method_decorator(cache_page(60 * 60, key_prefix='category_root_list'))
+    def list(self, request, *args, ** kwargs):
+        return super().list(request, *args, ** kwargs)
+
     def get_queryset(self):
-        # Filter leaf nodes efficiently (categories with no children)
-        return Category.objects.filter(rght=F("lft") + 1)
+        # Only root categories (no parent) that are active
+        return Category.objects.filter(parent=None, is_active=True)
 
 
 @extend_schema(
@@ -299,7 +317,6 @@ class BrandListView(ListAPIView):
 )
 class ReviewListView(ListAPIView):
     serializer_class = ReviewSerializer
-    queryset = Review.objects.none()
     pagination_class = None
     filter_backends = []
 

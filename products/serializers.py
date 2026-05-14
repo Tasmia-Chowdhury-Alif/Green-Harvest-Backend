@@ -22,14 +22,14 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_images(self, obj):
-        primary = obj.images.filter(is_primary=True).first()
-        if primary:
-            return ImageSerializer(primary).data
+        for img in obj.images.all():  # uses prefetch cache, zero extra queries
+            if img.is_primary:
+                return ImageSerializer(img).data
         return None
     
     @extend_schema_field(OpenApiTypes.STR)
     def get_category(self, obj):
-        return obj.category.name
+        return obj.category.name if obj.category else None
 
     class Meta:
         model = Product
@@ -77,13 +77,14 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'product_count', 'children']
 
 
-class CategoryLeafSerializer(serializers.ModelSerializer):
+class CategoryRootSerializer(serializers.ModelSerializer):
     product_count = serializers.SerializerMethodField()
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_product_count(self, obj):
-        # For leaves, just count direct products (no descendants needed)
-        return Product.objects.filter(category=obj).count()
+        # Count products in this category + ALL subcategories
+        descendants = obj.get_descendants(include_self=True)
+        return Product.objects.filter(category__in=descendants).count()
 
     class Meta:
         model = Category
